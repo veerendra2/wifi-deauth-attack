@@ -13,6 +13,4 @@ We can actually run in 3 ways
 * `sudo python deauth.py XX:YY:AA:XX:YY:AA`. MAC address as command line argument. In this case, there is no need to sniff wifi.
 * `export DEAUTH=XX:YY:AA:XX:YY:AA && sudo python deauth.py`. MAC address as environmental variables.
 
- [Screenshot](https://s13.postimg.org/5bikpyjp3/deauth.jpg)](https://postimg.org/image/3wh018ilv/)
-
 ####Difficult to setup environment for this?? check out my other [repo](https://github.com/veerendra2/wifi_sniffer): docker image `veerendrav2/wifi_sniffer`.
