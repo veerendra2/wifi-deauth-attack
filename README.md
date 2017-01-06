@@ -19,6 +19,6 @@ Use `802.11w` suppored routers. Know more about [802.11w](https://en.wikipedia.o
 ####NOTE: 
 Inorder to work deauthentication attack successful, you should near to the target network. The `deauth` packets should reach the connected devices of the target network(s)
 
-####Difficult to setup environment for this?? check out my other [repo](https://github.com/veerendra2/wifi_sniffer): docker image `veerendrav2/wifi_sniffer`.
+####Difficult to setup environment for this?? check out my other [repo](https://github.com/veerendra2/hacker-tools): docker image `veerendrav2/hacker-tools`.
 
 ####Blog: [https://networkhop.wordpress.com/2016/12/30/automated-wifi-de-authentication-attack/](https://networkhop.wordpress.com/2016/12/30/automated-wifi-de-authentication-attack/)
