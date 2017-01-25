@@ -4,7 +4,7 @@ Sends deauth packets to a wifi network which results network outage for connecte
 """
 __author__ ="Veerendra Kakumanu"
 __license__ = "Apache 2.0"
-__version__ = "2.0"
+__version__ = "2.1"
 __maintainer__ = "Veerendra Kakumanu"
 
 print "\n+---------------------------------------------------+"
@@ -51,11 +51,11 @@ class airmon(object):
 
 def findIface():
     iface=None
-    wireless_file="/home/n42/Desktop/wireless"
+    wireless_file="/proc/net/wireless"
     if os.path.exists(wireless_file):
         with open(wireless_file,'r') as f:
             for line in f.readlines():
-                if not re.search(r'Inter-',line) and not re.search(r'face',line) and line:
+                if not re.search(r'Inter-',line) and not re.search(r'face',line):
                     iface=line.split(":")[0]
     if iface:
         return iface.strip()
