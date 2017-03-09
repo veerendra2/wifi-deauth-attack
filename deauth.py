@@ -108,8 +108,8 @@ class Deauth(threading.Thread):
 
     def run(self):
         while True:
-            print self.mac
-            scapy.all.sendp(self.pkt, iface="mon0",count=1, inter=.2)
+            print "Sending packet->",self.mac
+            scapy.all.sendp(self.pkt, iface="mon0",count=1, inter=.2, verbose=0)
 
 if __name__=='__main__':
     if not os.geteuid() == 0:
