@@ -4,7 +4,7 @@ Written in Python, sends `deauth` packets to a wifi network which results networ
 Know more about [Deauthentication Attack](https://en.wikipedia.org/wiki/Wi-Fi_deauthentication_attack)
 
 ### Required Tools
-1. aircrack-ng (`apt-get install aircrack-ng`)
+1. aircrack-ng (`apt-get install aircrack-ng`). For latest version, install from [source](https://www.aircrack-ng.org/downloads.html) to support more network drivers/cards. 
 2. scapy (Python Module:`apt-get install python-scapy`)
 
 ### How to run?
