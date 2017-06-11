@@ -41,8 +41,8 @@ optional arguments:
 ### FAQ
 * ##### What is the option `-c` "COUNT"?
   
-  It is a threshold value to stop the "monitoring". The access point or wifi hotspot always trasmits [beacon frames](https://en.wikipedia.org/wiki/Beacon_frame) periodically to announce it's presence. The beacon frame contains all the information about the network. Now, the script looks for these beacons and makes count. If the count reachs the limit, it will stops the monitoring.
-  * If you think, the monoring is taking to much time? then specify the count with less number(Default is 2000), but it may not get all wifi hotspot near to you. Because you are listening only few beacons
+  It is a threshold value to stop the "monitoring". The access point or wifi hotspot trasmits [beacon frames](https://en.wikipedia.org/wiki/Beacon_frame) periodically to announce it's presence. The beacon frame contains all the information about the network. Now, the script looks for these beacons and makes count. If the count reachs the limit, it will stops the monitoring.
+  * If you think, the monoring is taking to much time? then specify the count with less number(Default is 2000), but it may not get all wifi hotspots near to you. Because you are listening only few beacons
 
 * ##### What is the option `-d` "Run as daemon"?
   
