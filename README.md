@@ -49,7 +49,7 @@ optional arguments:
   Script runs in background while attacking. (Kill it by running `pkill -9 -f deauth.py`)
 
 ### Known Issues
-* For some reasons, the script is not able to find all near wifi hotspots. 
+* For some reasons, sometimes the script is not able to find all near wifi hotspots. 
 * If you try to attack on a wifi hotspot which is by "Android" device, it won't work.(May be it has `802.11w`)
 
 ### Run it!
