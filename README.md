@@ -49,8 +49,8 @@ optional arguments:
   Script runs in background while attacking. (Kill it by running `pkill -9 -f deauth.py`)
 
 ### Known Issues
-* For some reasons, sometimes the script is not able to find all near wifi hotspots. 
-* If you try to attack on a wifi hotspot which is by "Android" device, it won't work.(May be it has `802.11w`)
+* For some reasons, sometimes the script is not able to find all near wifi hotspots.(Check [ssid_list.py](https://github.com/veerendra2/useless-scripts#6-ssid_listpy) to list wifi hotspot near to you)
+* If you try to attack on a wifi hotspot which is created by "Android" device, it won't work!.(May be it uses `802.11w`)
 
 ### Run it!
 `wget -qO deauth.py https://goo.gl/bnsV9C && sudo python deauth.py`
