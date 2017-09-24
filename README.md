@@ -1,3 +1,8 @@
+[![GitHub issues](https://img.shields.io/github/issues/veerendra2/wifi-deauth-attack.svg)](https://github.com/veerendra2/wifi-deauth-attack/issues)
+[![GitHub forks](https://img.shields.io/github/forks/veerendra2/wifi-deauth-attack.svg)](https://github.com/veerendra2/wifi-deauth-attack/network)
+[![GitHub stars](https://img.shields.io/github/stars/veerendra2/wifi-deauth-attack.svg)](https://github.com/veerendra2/wifi-deauth-attack/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/veerendra2/wifi-deauth-attack/master/LICENSE)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/veerendra2/wifi-deauth-attack.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=%5Bobject%20Object%5D)
 # Automated script for Wifi Deauthentication Attack
 ### Intro
 Written in Python, sends `deauth` packets to a wifi network which results network outage for connected devices. Uses `scapy` module to send `deauth` packets and sniffs wifi.
