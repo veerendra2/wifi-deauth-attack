@@ -63,7 +63,7 @@ def create_interface():
     iface=None
     try:
         with open(dev_file) as f:
-            return re.findall(r'(mon[0-9]+|wlan0mon)',f.read())[0]
+            return re.findall(r'(mon[0-9]+|prism[0-9]+|wlan0mon)',f.read())[0]
     except:
         print "Monitoring interface not found. Attempting to start airmon-ng"
         try:
@@ -75,7 +75,7 @@ def create_interface():
             print "\nairmon-ng not found. Please install aircrack-ng. RUN 'sudo apt-get install aircrack-ng -y'"
             exit(1)
         with open(dev_file) as f:
-            return re.findall(r'(mon[0-9]+|wlan0mon)',f.read())[0]
+            return re.findall(r'(mon[0-9]+|prism[0-9]+|wlan0mon)',f.read())[0]
 
 def spinner():
     while True:
