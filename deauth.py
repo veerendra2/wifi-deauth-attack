@@ -6,6 +6,7 @@ __author__ ="Veerendra Kakumanu"
 __license__ = "Apache 2.0"
 __version__ = "3.0"
 __maintainer__ = "Veerendra Kakumanu"
+__credits__ = ["Franz Kafka"]
 
 import os
 import sys
@@ -75,7 +76,11 @@ def create_interface():
             print "\nairmon-ng not found. Please install aircrack-ng. RUN 'sudo apt-get install aircrack-ng -y'"
             exit(1)
         with open(dev_file) as f:
-            return re.findall(r'(mon[0-9]+|prism[0-9]+|wlan0mon)',f.read())[0]
+            try:
+                return re.findall(r'(mon[0-9]+|prism[0-9]+|wlan0mon)',f.read())[0]
+            except IndexError:
+                print "[ERROR] Monitoring interface not found"
+                exit(1)
 
 def spinner():
     while True:
