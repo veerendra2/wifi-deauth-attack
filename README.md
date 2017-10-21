@@ -16,7 +16,7 @@ Know more about [Deauthentication Attack](https://en.wikipedia.org/wiki/Wi-Fi_de
 We can run in 2 ways:
 * `sudo python deauth.py` 
  
-   It will automatically creates `mon0` with `airmon-ng start wlan0`(it wont create, if already exists) and sniffs the wifi  singal on that interface. After few seconds, it will displays the `SSID` and its `MAC` to choose.
+   It will automatically creates `mon0` with `airmon-ng start wlan0`(it wont create, if already exists) and sniffs the wifi  signal on that interface. After few seconds, it will displays the `SSID` and its `MAC` to choose.
 * `sudo python deauth.py -m XX:YY:AA:XX:YY:AA` 
    
    MAC address as command line argument. In this case, there is no need to sniff wifi.
