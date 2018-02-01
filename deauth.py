@@ -30,12 +30,12 @@ patterns={"MAC Address" : 'Address:(.*)',
           "ESSID"       : 'ESSID:(.*)',
           "ID"          : '(.*) - Address'}
 def banner():
-    print "\n+---------------------------------------------------+"
-    print "|Deauth v3.0                        		    |"
-    print "|Coded by Veerendra Kakumanu                        |"
-    print "|Blog: www.networkhop.wordpress.com 		    |"
-    print "|https://github.com/veerendra2/wifi-deauth-attack   |"
-    print "+---------------------------------------------------+\n\n"
+    print "\n+----------------------------------------------------------------+"
+    print "|Deauth v3.0                                                     |"
+    print "|Coded by Veerendra Kakumanu                                     |"
+    print "|Blog: https://veerendra2.github.io/wifi-deathentication-attack/ |"
+    print "|https://github.com/veerendra2/wifi-deauth-attack                |"
+    print "+----------------------------------------------------------------+\n\n"
 
 def daemonize():
     if os.fork():
