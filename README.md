@@ -68,4 +68,4 @@ Inorder to work deauthentication attack successful, you should near to the targe
 
 #### Difficult to setup environment for this?? check out my other [repo](https://github.com/veerendra2/hacker-tools): docker image `veerendrav2/hacker-tools`.
 
-#### Blog: [https://networkhop.wordpress.com/2016/12/30/automated-wifi-de-authentication-attack/](https://networkhop.wordpress.com/2016/12/30/automated-wifi-de-authentication-attack/)
+#### Blog: https://veerendra2.github.io/wifi-deathentication-attack/
