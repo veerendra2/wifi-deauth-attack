@@ -46,6 +46,7 @@ optional arguments:
   -k          Kills "Deauth Daemon" if it is running
   -v          show program's version number and exit
 ```
+![In Action](https://raw.githubusercontent.com/veerendra2/wifi-deauth-attack/master/blog-image2.jpg)
 
 ### FAQ
 * ##### What is the option `-c` "COUNT"?
